@@ -39,10 +39,15 @@ public class GameView extends View {
     private int plane_x, plane_y, plane_s;
     private Bitmap plane[] = new Bitmap[plane_stage_max];
 
-    // spark
-    private int spark_x, spark_y, spark_s;
-    boolean spark_t = false;
-    private Bitmap spark;
+    // butterfly blue
+    private int butterfly_blue_x, butterfly_blue_y, butterfly_blue_s;
+    boolean butterfly_blue_t = false;
+    private Bitmap butterfly_blue;
+
+    // butterfly red
+    private int butterfly_red_x, butterfly_red_y, butterfly_red_s;
+    boolean butterfly_red_t = false;
+    private Bitmap butterfly_red;
 
     // bonus box
     private int box_x, box_y, box_s;
@@ -79,13 +84,17 @@ public class GameView extends View {
         plane_y = (int) (screen_height - plane[1].getHeight() * 1.5);
         plane_s = 20;
 
-        // spark
-        spark = BitmapFactory.decodeResource(getResources(), R.drawable.spark);
-        spark_s = 20;
+        // butterfly_red
+        butterfly_blue = BitmapFactory.decodeResource(getResources(), R.drawable.butterfly_blue);
+        butterfly_blue_s = 15;
+
+        // butterfly_red
+        butterfly_red = BitmapFactory.decodeResource(getResources(), R.drawable.butterfly_red);
+        butterfly_red_s = 15;
 
         // box
         box = BitmapFactory.decodeResource(getResources(), R.drawable.box_shield);
-        box_s = 10;
+        box_s = 5;
 
         touch_x = 0;
         touch_y = 0;
@@ -97,8 +106,10 @@ public class GameView extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        canvas_width = canvas.getWidth();
-        canvas_height = canvas.getHeight();
+//        canvas_width = canvas.getWidth();
+//        canvas_height = canvas.getHeight();
+        canvas_width = getWidth();
+        canvas_height = getHeight();
 
         // plane boundary
         int min_plane_x = 0;
@@ -161,11 +172,36 @@ public class GameView extends View {
         }
         canvas.drawBitmap(plane[plane_stage], plane_x, plane_y, null);
 
-        // spark hit check
-        for (int i = spark_x; i <= spark.getWidth() + spark_x; i++) {
-            for (int j = spark_y; j <= spark.getHeight() + spark_y; j++) {
+        // butterfly_blue hit check
+        for (int i = butterfly_blue_x; i <= butterfly_blue.getWidth() + butterfly_blue_x; i++) {
+            for (int j = butterfly_blue_y; j <= butterfly_blue.getHeight() + butterfly_blue_y; j++) {
                 if (hit_check(i, j)) {
-                    spark_y = canvas_height + 100;
+                    butterfly_blue_y = canvas_height + 100;
+                    plane_stage--;
+
+                    if (plane_stage == -1) {
+                        plane_stage = plane_stage_max - 1;
+                        // game over switch page
+//                Toast.makeText(getContext(), "Game Over", Toast.LENGTH_LONG).show();
+
+                        Intent game_over = new Intent(getContext(), OverPage.class);
+                        game_over.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+                        game_over.putExtra("score", score);
+                        getContext().startActivity(game_over);
+
+                    }
+
+                    i = max_plane_x * 2;
+                    break;
+                }
+            }
+        }
+
+        // butterfly_red hit check
+        for (int i = butterfly_red_x; i <= butterfly_red.getWidth() + butterfly_red_x; i++) {
+            for (int j = butterfly_red_y; j <= butterfly_red.getHeight() + butterfly_red_y; j++) {
+                if (hit_check(i, j)) {
+                    butterfly_red_y = canvas_height + 100;
                     plane_stage--;
 
                     if (plane_stage == -1) {
@@ -201,30 +237,38 @@ public class GameView extends View {
             }
         }
 
-        // generate spark
-        spark_y = spark_y + spark_s;
-        if (spark_t) {
-            spark_x = spark_x + 30;
-            if (spark_x >= canvas_width - spark.getWidth()) {
-                spark_t = false;
+        // generate butterfly_blue
+        butterfly_blue_y = butterfly_blue_y + butterfly_blue_s;
+        if (butterfly_blue_y > canvas_height) {
+            butterfly_blue_y = -butterfly_blue.getHeight();
+            butterfly_blue_x = random(butterfly_blue.getWidth());
+        }
+        canvas.drawBitmap(butterfly_blue, butterfly_blue_x, butterfly_blue_y, null);
+
+        // generate butterfly_red
+        butterfly_red_y = butterfly_red_y + butterfly_red_s;
+        if (butterfly_red_t) {
+            butterfly_red_x = butterfly_red_x + 20;
+            if (butterfly_red_x >= canvas_width - butterfly_red.getWidth()) {
+                butterfly_red_t = false;
             }
         } else {
-            spark_x = spark_x - 30;
-            if (spark_x <= min_plane_x) {
-                spark_t = true;
+            butterfly_red_x = butterfly_red_x - 20;
+            if (butterfly_red_x <= min_plane_x) {
+                butterfly_red_t = true;
             }
         }
-        if (spark_y > canvas_height) {
-            spark_y = -spark.getHeight();
-            spark_x = random();
+        if (butterfly_red_y > canvas_height) {
+            butterfly_red_y = -butterfly_red.getHeight();
+            butterfly_red_x = random(butterfly_red.getWidth());
         }
-        canvas.drawBitmap(spark, spark_x, spark_y, null);
+        canvas.drawBitmap(butterfly_red, butterfly_red_x, butterfly_red_y, null);
 
         // generate box
         box_y = box_y + box_s;
         if ((score % 1000) == 0) {
             box_y = -box.getHeight();
-            box_x = random();
+            box_x = random(box.getWidth());
         }
         canvas.drawBitmap(box, box_x, box_y, null);
 
@@ -234,18 +278,18 @@ public class GameView extends View {
     }
 
     public boolean hit_check(int x, int y) {
-        if (plane_x < x && x < (plane_x + plane[1].getWidth()) && plane_y < y && y < (plane_y + plane[1].getHeight())) {
-            return true;
-        } else {
-            return false;
-        }
+        return plane_x < x && x < (plane_x + plane[1].getWidth()) && plane_y < y && y < (plane_y + plane[1].getHeight());
     }
 
-    public int random() {
+    public int random(int margin) {
 //        int min_plane_x = 0;
 //        int max_plane_x = canvas_width - plane[plane_stage].getWidth();
+        int res = (int) Math.floor(Math.random() * canvas_width - margin);
+        if (res < 0) {
+            res = 0;
+        }
 
-        return (int) Math.floor(Math.random() * canvas_width - 0);
+        return res;
     }
 
     @Override
