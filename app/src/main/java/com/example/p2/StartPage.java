@@ -16,7 +16,7 @@ public class StartPage extends AppCompatActivity {
             public void run() {
 //                super.run();
                 try {
-                    sleep(3000);
+//                    sleep(3000);
                 }
                 catch (Exception e) {
                     e.printStackTrace();
