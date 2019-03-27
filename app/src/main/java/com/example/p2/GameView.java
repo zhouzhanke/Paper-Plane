@@ -206,8 +206,8 @@ public class GameView extends View {
 
         // butterfly_blue hit check
         for (int a = 0; a < butterfly_blue_limit; a++) {
-            for (int i = butterfly_blue_x[a]; i <= butterfly_blue[a].getWidth() + butterfly_blue_x[a]; i++) {
-                for (int j = butterfly_blue_y[a]; j <= butterfly_blue[a].getHeight() + butterfly_blue_y[a]; j++) {
+            for (int i = butterfly_blue_x[a]; i <= butterfly_blue[a].getWidth() + butterfly_blue_x[a]; i+=5) {
+                for (int j = butterfly_blue_y[a]; j <= butterfly_blue[a].getHeight() + butterfly_blue_y[a]; j+=5) {
                     if (hit_check(i, j)) {
                         butterfly_blue_y[a] = canvas_height + 100;
                         plane_stage--;
@@ -231,8 +231,8 @@ public class GameView extends View {
 
         // butterfly_red hit check
         for (int a = 0; a < butterfly_red_limit; a++) {
-            for (int i = butterfly_red_x[a]; i <= butterfly_red[a].getWidth() + butterfly_red_x[a]; i++) {
-                for (int j = butterfly_red_y[a]; j <= butterfly_red[a].getHeight() + butterfly_red_y[a]; j++) {
+            for (int i = butterfly_red_x[a]; i <= butterfly_red[a].getWidth() + butterfly_red_x[a]; i+=5) {
+                for (int j = butterfly_red_y[a]; j <= butterfly_red[a].getHeight() + butterfly_red_y[a]; j+=5) {
                     if (hit_check(i, j)) {
                         butterfly_red_y[a] = canvas_height + 100;
                         plane_stage--;
@@ -337,7 +337,7 @@ public class GameView extends View {
 
         // draw score_board board
         score = score + 1 + global_speed;
-        canvas.drawText("Score: " + score, 10, 100, score_board);
+        canvas.drawText("Score: " + score + "," + canvas_width +","+plane[plane_stage].getWidth(), 10, 100, score_board);
     }
 
     public boolean hit_check(int x, int y) {
@@ -346,11 +346,13 @@ public class GameView extends View {
         switch (plane_stage) {
             case 0:
                 // triangle
-                for (int i = 1; i <= 25; i++) {
-                    res = (x > (plane_x - i))
-                            && (x < (plane_x + i))
-                            && (y > (plane_y - (plane[plane_stage].getHeight() / 2)))
-                            && (y < ((plane_y + (plane[plane_stage].getHeight() / 2)) - (4 * i)));
+                int check_limit = 10;
+                for (int i = 1; i <= check_limit; i++) {
+                    res = (x >= (plane_x - i*(plane[plane_stage].getWidth()/check_limit)))
+                            && (x < (plane_x + i*(plane[plane_stage].getWidth()/check_limit)))
+                            && (y >= ((plane_y - (plane[plane_stage].getHeight() / 2)) + i*(plane[plane_stage].getHeight()/check_limit)))
+                            && (y < ((plane_y + (plane[plane_stage].getHeight() / 2)) + i*(plane[plane_stage].getHeight()/check_limit)));
+
                     if (res) {
                         break;
                     }
@@ -359,9 +361,9 @@ public class GameView extends View {
 
             case 1:
                 // square
-                res = x > (plane_x - plane[plane_stage].getWidth() / 2)
+                res = x >= (plane_x - plane[plane_stage].getWidth() / 2)
                         && x < (plane_x + plane[plane_stage].getWidth() / 2)
-                        && y > (plane_y - plane[plane_stage].getHeight() / 2)
+                        && y >= (plane_y - plane[plane_stage].getHeight() / 2)
                         && y < (plane_y + plane[plane_stage].getHeight() / 2);
                 break;
         }
