@@ -14,6 +14,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 public class GameView extends View {
+    double angle_rad;
     private int canvas_width, canvas_height;
     private boolean touched = false;
     private int touch_x, touch_y;
@@ -21,8 +22,6 @@ public class GameView extends View {
     private int move_x, move_y;
     private int global_speed;
     private double distance;
-    double angle_rad;
-
     // start message
     private String msg_1 = "Tap to Start";
     private Paint msg_start = new Paint();
@@ -103,10 +102,13 @@ public class GameView extends View {
         plane_stage = 0;
         plane[0] = BitmapFactory.decodeResource(getResources(), R.drawable.plane_0);
         plane[1] = BitmapFactory.decodeResource(getResources(), R.drawable.plane_1);
-        plane_x = screen_width / 2 - plane[1].getWidth() / 2;
-        plane_y = (int) (screen_height - plane[1].getHeight() * 1.5);
+//        plane_x = screen_width / 2 - plane[1].getWidth() / 2;
+//        plane_y = (int) (screen_height - plane[1].getHeight() * 1.5);
+        plane_x = screen_width / 2;
+        plane_y = screen_height - plane[1].getHeight();
         plane_s = 20;
 
+        // TODO: texture should be changed later on
         // butterfly_red
         butterfly_blue[0] = BitmapFactory.decodeResource(getResources(), R.drawable.butterfly_blue);
         butterfly_blue[1] = BitmapFactory.decodeResource(getResources(), R.drawable.butterfly_blue);
@@ -151,30 +153,23 @@ public class GameView extends View {
         int min_plane_y = 0;
         int max_plane_y = canvas_height - plane[plane_stage].getHeight();
 
+        canvas.drawBitmap(plane[plane_stage], plane_x - plane[plane_stage].getWidth() / 2,
+                plane_y - plane[plane_stage].getHeight() / 2, null);
         if (!touch_start) {
             canvas.drawText("Tap to Start", msg_start_x, msg_start_y, msg_start);
-            canvas.drawBitmap(plane[plane_stage], plane_x, plane_y, null);
             return;
         }
         if (msg_start_y < canvas_height * 2) {
             msg_start_y += msg_start_s;
             canvas.drawText(msg_1, msg_start_x, msg_start_y, msg_start);
         }
-//        // plane motion 1
-//        plane_x = plane_x + plane_s;
-//
-//        // touched dirction on touch
-//        if (touched) {
-//            touched = false;
-//            plane_s = plane_s * (-1);
-//        }
 
-        // plane motion 2
+        // plane motion
         if (touched) {
             touched = false;
             // adjust touched point to center of plane
-            touch_x -= plane[plane_stage].getWidth() / 2;
-            touch_y -= plane[plane_stage].getHeight() / 2;
+//            touch_x -= plane[plane_stage].getWidth() / 2;
+//            touch_y -= plane[plane_stage].getHeight() / 2;
 
             distance = Math.sqrt(Math.pow(touch_x - plane_x, 2) + Math.pow(touch_y - plane_y, 2));
             angle_rad = Math.atan2((double) touch_y - (double) plane_y, (double) touch_x - (double) plane_x);
@@ -184,7 +179,7 @@ public class GameView extends View {
             int move = plane_s;
             distance -= move;
             if (distance < 0) {
-                move = (int)Math.abs(distance);
+                move = (int) Math.abs(distance);
                 distance = 0;
             }
 
@@ -193,31 +188,21 @@ public class GameView extends View {
         }
 
         // border
-        if (plane_x < min_plane_x) {
-            plane_x = min_plane_x;
+        if (plane_x < min_plane_x + plane[plane_stage].getWidth() / 2) {
+            plane_x = min_plane_x + plane[plane_stage].getWidth() / 2;
         }
-        if (plane_x > max_plane_x) {
-            plane_x = max_plane_x;
+        if (plane_x > max_plane_x + plane[plane_stage].getWidth() / 2) {
+            plane_x = max_plane_x + plane[plane_stage].getWidth() / 2;
         }
-        if (plane_y < min_plane_y) {
-            plane_y = min_plane_y;
+        if (plane_y < min_plane_y + plane[plane_stage].getHeight() / 2) {
+            plane_y = min_plane_y + plane[plane_stage].getHeight() / 2;
         }
-        if (plane_y > max_plane_y) {
-            plane_y = max_plane_y;
+        if (plane_y > max_plane_y + plane[plane_stage].getHeight() / 2) {
+            plane_y = max_plane_y + plane[plane_stage].getHeight() / 2;
         }
 
         // draw plane
-        switch (plane_stage) {
-            case 0:
-                break;
-
-            case 1:
-                break;
-
-            default:
-                break;
-        }
-        canvas.drawBitmap(plane[plane_stage], plane_x, plane_y, null);
+//        canvas.drawBitmap(plane[plane_stage], plane_x, plane_y, null);
 
         // butterfly_blue hit check
         for (int a = 0; a < butterfly_blue_limit; a++) {
@@ -229,16 +214,14 @@ public class GameView extends View {
 
                         if (plane_stage == -1) {
                             plane_stage = plane_stage_max - 1;
-                            // game over switch page
+                            // game over, switch page
 //                Toast.makeText(getContext(), "Game Over", Toast.LENGTH_LONG).show();
 
                             Intent game_over = new Intent(getContext(), OverPage.class);
                             game_over.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
                             game_over.putExtra("score", score);
                             getContext().startActivity(game_over);
-
                         }
-
                         i = max_plane_x * 2;
                         break;
                     }
@@ -247,29 +230,6 @@ public class GameView extends View {
         }
 
         // butterfly_red hit check
-//        for (int i = butterfly_red_x; i <= butterfly_red.getWidth() + butterfly_red_x; i++) {
-//            for (int j = butterfly_red_y; j <= butterfly_red.getHeight() + butterfly_red_y; j++) {
-//                if (hit_check(i, j)) {
-//                    butterfly_red_y = canvas_height + 100;
-//                    plane_stage--;
-//
-//                    if (plane_stage == -1) {
-//                        plane_stage = plane_stage_max - 1;
-//                        // game over switch page
-////                Toast.makeText(getContext(), "Game Over", Toast.LENGTH_LONG).show();
-//
-//                        Intent game_over = new Intent(getContext(), OverPage.class);
-//                        game_over.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-//                        game_over.putExtra("score", score);
-//                        getContext().startActivity(game_over);
-//
-//                    }
-//
-//                    i = max_plane_x * 2;
-//                    break;
-//                }
-//            }
-//        }
         for (int a = 0; a < butterfly_red_limit; a++) {
             for (int i = butterfly_red_x[a]; i <= butterfly_red[a].getWidth() + butterfly_red_x[a]; i++) {
                 for (int j = butterfly_red_y[a]; j <= butterfly_red[a].getHeight() + butterfly_red_y[a]; j++) {
@@ -312,12 +272,6 @@ public class GameView extends View {
         }
 
         // generate butterfly_blue
-//        butterfly_blue_y = butterfly_blue_y + butterfly_blue_s;
-//        if (butterfly_blue_y > canvas_height) {
-//            butterfly_blue_y = -butterfly_blue.getHeight();
-//            butterfly_blue_x = random(butterfly_blue.getWidth());
-//        }
-//        canvas.drawBitmap(butterfly_blue, butterfly_blue_x, butterfly_blue_y, null);
         if (score == 500 || score == 1000 || score == 4000) {
             butterfly_blue_limit++;
         }
@@ -373,26 +327,7 @@ public class GameView extends View {
             canvas.drawBitmap(butterfly_red[i], butterfly_red_x[i], butterfly_red_y[i], null);
         }
 
-
-//        butterfly_red_y = butterfly_red_y + butterfly_red_s;
-//        if (butterfly_red_t) {
-//            butterfly_red_x = butterfly_red_x + 20;
-//            if (butterfly_red_x >= canvas_width - butterfly_red.getWidth()) {
-//                butterfly_red_t = false;
-//            }
-//        } else {
-//            butterfly_red_x = butterfly_red_x - 20;
-//            if (butterfly_red_x <= min_plane_x) {
-//                butterfly_red_t = true;
-//            }
-//        }
-//        if (butterfly_red_y > canvas_height) {
-//            butterfly_red_y = -butterfly_red.getHeight();
-//            butterfly_red_x = random(butterfly_red.getWidth());
-//        }
-//        canvas.drawBitmap(butterfly_red, butterfly_red_x, butterfly_red_y, null);
-
-        // generate box
+        // generate bonus box
         box_y = box_y + box_s;
         if ((score % 1000) == 0) {
             box_y = -box.getHeight();
@@ -406,7 +341,31 @@ public class GameView extends View {
     }
 
     public boolean hit_check(int x, int y) {
-        return plane_x < x && x < (plane_x + plane[1].getWidth()) && plane_y < y && y < (plane_y + plane[1].getHeight());
+//        return plane_x < x && x < (plane_x + plane[1].getWidth()) && plane_y < y && y < (plane_y + plane[1].getHeight());
+        boolean res = false;
+        switch (plane_stage) {
+            case 0:
+                // triangle
+                for (int i = 1; i <= 25; i++) {
+                    res = (x > (plane_x - i))
+                            && (x < (plane_x + i))
+                            && (y > (plane_y - (plane[plane_stage].getHeight() / 2)))
+                            && (y < ((plane_y + (plane[plane_stage].getHeight() / 2)) - (4 * i)));
+                    if (res) {
+                        break;
+                    }
+                }
+                break;
+
+            case 1:
+                // square
+                res = x > (plane_x - plane[plane_stage].getWidth() / 2)
+                        && x < (plane_x + plane[plane_stage].getWidth() / 2)
+                        && y > (plane_y - plane[plane_stage].getHeight() / 2)
+                        && y < (plane_y + plane[plane_stage].getHeight() / 2);
+                break;
+        }
+        return res;
     }
 
     public int random(int margin) {

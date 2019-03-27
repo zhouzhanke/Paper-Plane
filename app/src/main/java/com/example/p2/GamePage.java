@@ -18,7 +18,7 @@ public class GamePage extends AppCompatActivity {
 //        setContentView(R.layout.activity_main);
         game_view = new GameView(this);
         setContentView(game_view);
-        game_view.setBackground(getResources().getDrawable(R.drawable.bg_1));
+        game_view.setBackground(getResources().getDrawable(R.drawable.bg_2));
 
         Timer timer = new Timer();
         timer.schedule(new TimerTask() {
