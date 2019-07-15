@@ -1,4 +1,4 @@
 # android game (JAVA)
 COMP final project v2
 
-A game that player control an object to avoid obstacle to get score, the difficult of game will increase as score increase, there will be some items that help player to play the game.
+An android clicker game that player control a free moving player-object to avoid obstacles. Obstacles will move at a random speed from top of screen to the bottom of the screen.  Different type of obstacles will have different move pattern.
